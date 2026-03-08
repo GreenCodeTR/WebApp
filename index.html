@@ -126,8 +126,8 @@
         .view-btn:hover { background: var(--hover-bg); }
         .view-btn.active { background: rgba(56, 189, 248, 0.15); color: var(--accent); border-color: var(--accent); }
 
-        /* AYLIK GÖRÜNÜM AY SEÇİCİ */
-        .month-nav-container { display: none; justify-content: space-between; align-items: center; background: var(--table-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 10px 20px; }
+        /* AYLIK/YILLIK GÖRÜNÜM AY SEÇİCİ */
+.month-nav-container { display: none; justify-content: center; gap: 20px; align-items: center; background: var(--table-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 10px 20px; text-align: center; }
         .month-nav-container.active { display: flex; }
         #currentMonthLabel { font-weight: 800; font-size: 1.2em; color: var(--accent); text-transform: uppercase; }
 
@@ -151,7 +151,7 @@
         .date-hicri { font-weight: 800; }
         .date-miladi { color: var(--text-muted); font-size: 0.9em; }
 
-        /* SAYFALAMA (PAGINATION) STİLLERİ */
+        /* SAYFALAMA (PAGINATION) STİLLERİ - ARTIK GİZLİ */
         .pagination-container { display: none; justify-content: space-between; align-items: center; background: var(--table-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 20px; font-size: 0.9em; }
         .page-info { color: var(--text-muted); font-weight: 600;}
         .page-controls { display: flex; gap: 5px; align-items: center;}
@@ -161,8 +161,8 @@
         .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
         /* FOOTER SAYAÇ STİLLERİ */
-        .site-footer { width: 100%; text-align: center; padding: 15px 0; margin-top: auto; color: var(--text-muted); font-size: 0.95em; font-weight: 600; border-top: 1px dashed var(--border-color); }
-        .site-footer strong { color: var(--accent); font-size: 1.1em; letter-spacing: 1px; }
+.site-footer { width: 100%; text-align: center; padding: 15px 0; margin-top: auto; color: var(--text-muted); font-size: 0.8em; font-weight: 600; border-top: 1px dashed var(--border-color); }
+.site-footer strong { color: var(--accent); font-size: 0.95em; letter-spacing: 1px; }
 
         /* MODAL STİLLERİ */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
@@ -280,7 +280,7 @@
             <button class="zikir-btn" onclick="addZikir()">📿 Zikir Çek</button>
         </div>
         
-        <button class="calc-btn-main" onclick="openCalcModal()">💰 Fitre & Zekât Hesapla</button>
+        <button id="fitreZekatBtn" class="calc-btn-main" onclick="openCalcModal()" style="display: none;">💰 Fitre & Zekât Hesapla</button>
 
         <div class="settings-grid">
             <div class="old-settings-layout">
@@ -434,7 +434,7 @@
     let globalYearData = [];
     let allEvents = [];
     let currentView = 'aylik'; 
-    let currentPage = 1;
+    let currentPage = new Date().getMonth() + 1; // Yıllık görünüm için aktif ay
     let selectedMonthIndex = new Date().getMonth(); // Aylık görünüm için seçili ay
     let countdownInterval;
     let warningPlayed = false;
@@ -469,14 +469,30 @@
     // Ziyaretçi Sayacı (API veya Local Fallback)
     async function fetchVisitorCount() {
         try {
-            const res = await fetch('https://api.counterapi.dev/v1/namazvaktiasistani/ziyaret/up');
+            // Sayfayı her yenileyişte artmaması için session kontrolü yapıyoruz
+            let visited = sessionStorage.getItem('ziyaret_edildi');
+            
+            // Sayacı sıfırlamak için url'nin sonundaki 'ziyaret' ismini 'ziyaret_v2' olarak değiştirdik.
+            let apiUrl = 'https://api.counterapi.dev/v1/namazvaktiasistani/ziyaret_v2';
+            
+            if (!visited) {
+                apiUrl += '/up'; // Sadece oturumda ilk defa giriyorsa artır
+                sessionStorage.setItem('ziyaret_edildi', 'true');
+            }
+            
+            const res = await fetch(apiUrl);
             const data = await res.json();
             document.getElementById('visitCount').innerText = data.count.toLocaleString('tr-TR');
         } catch(e) {
-            let visits = localStorage.getItem('local_visits') || 15420;
-            visits = parseInt(visits) + 1;
-            localStorage.setItem('local_visits', visits);
-            document.getElementById('visitCount').innerText = visits.toLocaleString('tr-TR');
+            // API hata verirse (rate limit vb.) local storage ile fallback yap
+            // Eski 15420 başlangıç değerini 0 olarak güncelledik
+            let visits = localStorage.getItem('local_visits_v2') || 0; 
+            if (!sessionStorage.getItem('ziyaret_edildi_local')) {
+                visits = parseInt(visits) + 1;
+                localStorage.setItem('local_visits_v2', visits);
+                sessionStorage.setItem('ziyaret_edildi_local', 'true');
+            }
+            document.getElementById('visitCount').innerText = parseInt(visits).toLocaleString('tr-TR');
         }
     }
 
@@ -780,6 +796,18 @@
 
             renderTable(currentView);
             
+            // --- RAMAZAN AYI KONTROLÜ VE BUTON GÖSTERİMİ ---
+            const bugun = new Date();
+            const bugunStr = String(bugun.getDate()).padStart(2, '0') + '.' + String(bugun.getMonth() + 1).padStart(2, '0') + '.' + bugun.getFullYear();
+            const bugunVerisi = globalYearData.find(d => d.mDate === bugunStr);
+            
+            if (bugunVerisi && bugunVerisi.hicriStr.includes("Ramazan")) {
+                document.getElementById('fitreZekatBtn').style.display = 'block';
+            } else {
+                document.getElementById('fitreZekatBtn').style.display = 'none';
+            }
+            // ----------------------------------------------
+            
             if(isInitialLoad) {
                 isInitialLoad = false;
                 startCountdown();
@@ -790,18 +818,20 @@
         }
     }
 
-    // AYLIK GÖRÜNÜMDE AY DEĞİŞTİRME FONKSİYONU
+    // YILLIK GÖRÜNÜMDE AY DEĞİŞTİRME FONKSİYONU
     window.changeMonth = function(dir) {
-        selectedMonthIndex += dir;
-        if(selectedMonthIndex < 0) selectedMonthIndex = 0;
-        if(selectedMonthIndex > 11) selectedMonthIndex = 11;
-        renderTable('aylik');
+        if (currentView === 'yillik') {
+            currentPage += dir;
+            if(currentPage < 1) currentPage = 1;
+            if(currentPage > 12) currentPage = 12;
+            renderTable('yillik');
+        }
     };
 
     function changeView(viewType) {
         currentView = viewType;
         if(viewType === 'yillik') {
-            currentPage = new Date().getMonth() + 1; // Bulunduğun ayı açar
+            currentPage = new Date().getMonth() + 1; // Yıllık görünüme girince bulunduğun ayı açar
         } else if (viewType === 'aylik') {
             selectedMonthIndex = new Date().getMonth(); // Aylık görünüme girince bulunduğun ayı açar
         }
@@ -810,7 +840,7 @@
         renderTable(viewType);
     }
 
-    function renderTable(viewType) {
+function renderTable(viewType) {
         const tbody1 = document.getElementById('tbody1'); 
         const tbody2 = document.getElementById('tbody2');
         const tablesWrapper = document.getElementById('tablesWrapper');
@@ -833,38 +863,55 @@
             
         } else if (viewType === 'aylik') {
             tablesWrapper.classList.remove('single-col'); 
-            monthNav.classList.add('active'); // Aylık görünümde ay değiştiriciyi göster
+            monthNav.classList.remove('active');
             
             filteredData = globalYearData.filter(d => d.rawDateObj.getMonth() === selectedMonthIndex);
-            
-            // Ay etiketini güncelle
-            const aylar = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-            document.getElementById('currentMonthLabel').innerText = aylar[selectedMonthIndex] + " " + today.getFullYear();
-            
-            // Sınır butonlarını ayarla
-            document.getElementById('prevMonthBtn').disabled = (selectedMonthIndex === 0);
-            document.getElementById('nextMonthBtn').disabled = (selectedMonthIndex === 11);
 
         } else if (viewType === 'yillik') {
             tablesWrapper.classList.remove('single-col'); 
-            monthNav.classList.remove('active');
-            document.getElementById('pagination-container').style.display = 'flex';
+            monthNav.classList.add('active'); 
             
             let monthIndex = currentPage - 1;
             filteredData = globalYearData.filter(d => d.rawDateObj.getMonth() === monthIndex);
             
-            let startIndex = globalYearData.indexOf(filteredData[0]);
-            let endIndex = startIndex + filteredData.length;
-            let totalItems = globalYearData.length;
-            let totalPages = 12;
-
-            renderPagination(totalItems, startIndex, endIndex, totalPages);
+            const aylar = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+            document.getElementById('currentMonthLabel').innerText = aylar[monthIndex] + " " + today.getFullYear();
+            
+            document.getElementById('prevMonthBtn').disabled = (monthIndex === 0);
+            document.getElementById('nextMonthBtn').disabled = (monthIndex === 11);
         }
 
         const todayStr = String(today.getDate()).padStart(2, '0') + '.' + String(today.getMonth() + 1).padStart(2, '0') + '.' + today.getFullYear();
         
+        // Tabloyu ikiye bölme noktamız (Örn: 30 gün ise 15)
         let mid = viewType === 'haftalik' ? filteredData.length : Math.ceil(filteredData.length / 2);
         
+        // --- BAŞLIKLARI DİNAMİK GÜNCELLEME KISMI (DÜZELTİLDİ) ---
+        if (filteredData.length > 0) {
+            // Tablo 1 İçin (Ayın ilk yarısındaki yılı alır)
+            let data1 = filteredData[0];
+            let mYear1 = data1.mDate.split('.')[2]; 
+            let hYear1 = data1.hicriStr.split(' ')[2]; 
+            
+            let thHicri1 = document.querySelector('#table1 thead th:nth-child(1)');
+            let thMiladi1 = document.querySelector('#table1 thead th:nth-child(2)');
+            if(thHicri1) thHicri1.innerText = `Hicri (${hYear1})`;
+            if(thMiladi1) thMiladi1.innerText = `Miladi (${mYear1})`;
+
+            // Tablo 2 İçin (Ayın ikinci yarısındaki / 16'sındaki yılı alır)
+            if (filteredData[mid]) {
+                let data2 = filteredData[mid]; // Tablo 2'nin ilk verisine bakar
+                let mYear2 = data2.mDate.split('.')[2]; 
+                let hYear2 = data2.hicriStr.split(' ')[2]; 
+                
+                let thHicri2 = document.querySelector('#table2 thead th:nth-child(1)');
+                let thMiladi2 = document.querySelector('#table2 thead th:nth-child(2)');
+                if(thHicri2) thHicri2.innerText = `Hicri (${hYear2})`;
+                if(thMiladi2) thMiladi2.innerText = `Miladi (${mYear2})`;
+            }
+        }
+        // --------------------------------------------------------
+
         let todayRef = null;
         let todayData = null;
 
@@ -894,40 +941,6 @@
             selectDay(tbody1.firstChild, fData.index, fData.hicriStr, fData.mDate, fData.im, fData.gu, fData.og, fData.ik, fData.ak, fData.ya, false, false);
         }
     }
-
-    function renderPagination(totalItems, startIndex, endIndex, totalPages) {
-        const container = document.getElementById('pagination-container');
-        let html = `<div class="page-info">${totalItems} kayıttan ${startIndex + 1} - ${endIndex} arasındaki kayıtlar gösteriliyor</div>`;
-
-        let controls = `<div class="page-controls">`;
-        controls += `<button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>Önceki</button>`;
-
-        let pagesHtml = '';
-        let lastAdded = 0;
-        for (let i = 1; i <= totalPages; i++) {
-            if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
-                if (lastAdded > 0 && lastAdded + 1 !== i) {
-                    pagesHtml += `<span style="padding: 0 5px; color: var(--text-muted); font-weight: bold;">...</span>`;
-                }
-                pagesHtml += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
-                lastAdded = i;
-            }
-        }
-
-        controls += pagesHtml;
-        controls += `<button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Sonraki</button>`;
-        controls += `</div>`;
-
-        container.innerHTML = html + controls;
-    }
-
-    window.changePage = function(page) {
-        if(page >= 1 && page <= 12) {
-            currentPage = page;
-            renderTable('yillik');
-        }
-    }
-
    function startCountdown() {
         allEvents.sort((a,b) => a.t - b.t);
         clearInterval(countdownInterval);
