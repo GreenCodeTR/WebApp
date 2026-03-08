@@ -5,7 +5,7 @@
     <meta name="theme-color" content="#38bdf8">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> 1447 / 2026 Ramazan İmsakiyesi</title>
+    <title>Namaz Vakitleri ve İbadet Asistanı</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🕌</text></svg>">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
@@ -91,12 +91,6 @@
         .time-row.iftar { color: var(--iftar-color); font-weight: bold; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border-bottom: none; padding: 10px;}
         .past-time { opacity: 0.35; } 
 
-        .bayram-box { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; border-radius: 12px; background: rgba(16, 185, 129, 0.1); border: 1px dashed var(--iftar-color); margin: 5px 0 10px 0; }
-        .bayram-title { font-size: 0.80em; color: var(--text-muted); font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
-        .bayram-date { font-size: 1.05em; color: var(--iftar-color); font-weight: bold; }
-        .bayram-time-title { font-size: 0.75em; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; cursor: help;}
-        .bayram-time { font-size: 1.6em; font-weight: 900; color: var(--text-color); font-variant-numeric: tabular-nums; line-height: 1;}
-
         .zikir-box { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; border-radius: 12px; background: var(--bg-color); border: 1px solid var(--border-color); margin: 10px 0 5px 0; }
         .zikir-display { font-size: 1.8em; font-weight: 900; color: var(--accent); width: 60px; text-align: center; font-variant-numeric: tabular-nums; }
         .zikir-btn { flex-grow: 1; margin: 0 15px; padding: 10px; border-radius: 8px; border: none; background: rgba(56, 189, 248, 0.15); color: var(--text-color); font-weight: bold; cursor: pointer; transition: 0.1s; border: 1px solid var(--accent);}
@@ -110,7 +104,6 @@
         .settings-grid { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border-color); }
         .old-settings-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
-        /* DİYANET ŞEHİR VE İLÇE KUTUSU STİLLERİ */
         .location-span { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .location-span select { width: 100%; padding: 0 8px; font-size: 12px; border-radius: 6px; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--text-color); height: 38px; box-sizing: border-box; outline: none; cursor: pointer;}
         
@@ -126,11 +119,22 @@
         .btn-fullscreen-settings:hover { background: var(--hover-bg); }
 
         .right-panel { display: flex; flex-direction: column; gap: 15px; height: 100%; }
-        .tables-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex-grow: 1; height: 100%; min-height: 0; }
+        
+        /* GÖRÜNÜM BUTONLARI */
+        .view-tabs { display: flex; gap: 10px; margin-bottom: 5px; }
+        .view-btn { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--table-bg); color: var(--text-color); font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;}
+        .view-btn:hover { background: var(--hover-bg); }
+        .view-btn.active { background: rgba(56, 189, 248, 0.15); color: var(--accent); border-color: var(--accent); }
+
+        .tables-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex-grow: 1; height: 100%; min-height: 0; overflow-y: auto;}
+        .tables-wrapper.single-col { grid-template-columns: 1fr; }
+        .tables-wrapper.single-col #table2-container { display: none; }
+        
+        /* Tablonun yüksekliğini kapsayıcıya yayma komutu */
         .table-card { border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); background-color: var(--table-bg); display: flex; flex-direction: column; height: 100%; }
         table { width: 100%; height: 100%; border-collapse: collapse; text-align: center; font-size: clamp(0.7em, 1.3vh, 1em); table-layout: fixed; }
         th, td { padding: 0; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
-        th { background-color: var(--table-header-bg); color: var(--accent); font-weight: 700; }
+        th { background-color: var(--table-header-bg); color: var(--accent); font-weight: 700; padding: 8px 0; height: max-content;}
         tr { cursor: pointer; transition: background 0.15s; }
         tr:hover { background-color: var(--hover-bg); }
         .today-row { background-color: rgba(16, 185, 129, 0.12) !important; font-weight: bold; border: 1px solid var(--iftar-color); }
@@ -138,6 +142,15 @@
         .iftar-col { color: var(--iftar-color); font-weight: 800; }
         .date-hicri { font-weight: 800; }
         .date-miladi { color: var(--text-muted); font-size: 0.9em; }
+
+        /* SAYFALAMA (PAGINATION) STİLLERİ */
+        .pagination-container { display: none; justify-content: space-between; align-items: center; background: var(--table-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 20px; font-size: 0.9em; }
+        .page-info { color: var(--text-muted); font-weight: 600;}
+        .page-controls { display: flex; gap: 5px; align-items: center;}
+        .page-btn { padding: 6px 12px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color); cursor: pointer; border-radius: 6px; transition: 0.2s; font-weight: 600; font-family: inherit;}
+        .page-btn:hover:not(:disabled) { background: var(--hover-bg); }
+        .page-btn.active { background: rgba(56, 189, 248, 0.15); color: var(--accent); border-color: var(--accent); }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
         /* MODAL STİLLERİ */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
@@ -160,9 +173,6 @@
         .banner-title { color: var(--accent); font-size: 1.05em; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;}
         .banner-content { font-size: 0.95em; color: var(--text-color); line-height: 1.5; font-style: italic;}
         .banner-source { font-size: 0.8em; color: var(--text-muted); margin-top: 10px; font-weight: 600; text-align: right; }
-        .menu-list { display: flex; flex-direction: column; gap: 10px; }
-        .menu-item { display: flex; align-items: center; justify-content: flex-start; gap: 10px; font-size: 1em; color: var(--text-color); }
-        .menu-icon { opacity: 0.8; font-size: 1.2em; }
 
         /* HESAPLAMA MODALI */
         .calc-section { background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
@@ -179,19 +189,21 @@
 
         @media (max-width: 1300px) { 
             .main-wrapper { grid-template-columns: 320px 1fr; height: auto; }
-            .tables-wrapper { grid-template-columns: 1fr; gap: 0; height: auto; border-radius: 16px; border: 1px solid var(--border-color); overflow: hidden; } 
-            .table-card { border: none; border-radius: 0; height: auto; }
+            .tables-wrapper:not(.single-col) { grid-template-columns: 1fr; gap: 0; height: auto; border-radius: 16px; border: 1px solid var(--border-color); overflow: hidden; } 
+            .tables-wrapper:not(.single-col) .table-card { border: none; border-radius: 0; height: auto; }
             #table2 thead { display: none; }
         }
         @media (max-width: 800px) {
             .main-wrapper { grid-template-columns: 1fr; display: flex; flex-direction: column; }
             body { height: auto; overflow: auto; padding: 10px; }
+            .pagination-container { flex-direction: column; gap: 15px; text-align: center;}
         }
         @media (max-width: 600px) {
             .daily-banner-modal { grid-template-columns: 1fr; }
             .modal-times { grid-template-columns: repeat(3, 1fr); }
             .tdv-grid { grid-template-columns: 1fr; } 
             table { font-size: 0.85em; } 
+            .view-tabs { flex-direction: column; }
         }
         @media (max-height: 650px) {
             body { height: auto !important; min-height: 100vh; overflow-y: auto !important; display: block; }
@@ -215,7 +227,7 @@
 <audio id="sound_warning" src="https://assets.mixkit.co/active_storage/sfx/2005/2005-preview.mp3"></audio>
 
 <div class="top-header-container">
-    <h1 class="top-header">🌙 1447 / 2026 <strong>Ramazan</strong> İmsakiyesi</h1>
+    <h1 class="top-header">🕌 <strong>Namaz Vakitleri</strong> Asistanı</h1>
     <div class="header-line"></div>
 </div>
 
@@ -240,24 +252,13 @@
 
             <div id="progressContainer" style="display: none;">
                 <div class="progress-wrapper"><div class="progress-bar" id="progressBar"></div></div>
-                <span class="progress-text" id="progressText">Oruç İlerlemesi: %0</span>
+                <span class="progress-text" id="progressText">Gün İlerlemesi: %0</span>
             </div>
         </div>
 
         <div class="today-wrapper">
             <h2 id="selectedDayTitle">🗓️ Bugünün Vakit Saatleri</h2>
             <div class="today-times" id="todayTimesContainer"></div>
-        </div>
-
-        <div class="bayram-box" id="bayramBox">
-            <div>
-                <div class="bayram-title">🎉 Ramazan Bayramı (1. Gün)</div>
-                <div class="bayram-date">20 Mart 2026 Cuma</div>
-            </div>
-            <div style="text-align: right;">
-                <div class="bayram-time-title" title="Diyanet hesabına %100 uyumlu olarak otomatik hesaplanmıştır.">Namaz Vakti*</div>
-                <div class="bayram-time" id="bayramTime">--:--</div>
-            </div>
         </div>
 
         <div class="zikir-box">
@@ -322,33 +323,41 @@
     </div>
 
     <div class="right-panel">
-        <div class="tables-wrapper" id="tablesWrapper">
-            <div class="table-card"><table id="table1"><thead><tr><th>Hicri (1447)</th><th>Miladi (2026)</th><th>İmsak</th><th>Güneş</th><th>Öğle</th><th>İkindi</th><th class="iftar-col">İftar</th><th>Yatsı</th></tr></thead><tbody id="tbody1"></tbody></table></div>
-            <div class="table-card"><table id="table2"><thead><tr><th>Hicri (1447)</th><th>Miladi (2026)</th><th>İmsak</th><th>Güneş</th><th>Öğle</th><th>İkindi</th><th class="iftar-col">İftar</th><th>Yatsı</th></tr></thead><tbody id="tbody2"></tbody></table></div>
+        
+        <div class="view-tabs">
+            <button id="btn-haftalik" class="view-btn" onclick="changeView('haftalik')">📅 Haftalık Görünüm</button>
+            <button id="btn-aylik" class="view-btn active" onclick="changeView('aylik')">🗓️ Aylık Görünüm</button>
+            <button id="btn-yillik" class="view-btn" onclick="changeView('yillik')">🌍 Yıllık Görünüm</button>
         </div>
+
+        <div class="tables-wrapper" id="tablesWrapper">
+            <div class="table-card" id="table1-container"><table id="table1"><thead><tr><th>Hicri</th><th>Miladi</th><th>İmsak</th><th>Güneş</th><th>Öğle</th><th>İkindi</th><th class="iftar-col">Akşam</th><th>Yatsı</th></tr></thead><tbody id="tbody1"></tbody></table></div>
+            <div class="table-card" id="table2-container"><table id="table2"><thead><tr><th>Hicri</th><th>Miladi</th><th>İmsak</th><th>Güneş</th><th>Öğle</th><th>İkindi</th><th class="iftar-col">Akşam</th><th>Yatsı</th></tr></thead><tbody id="tbody2"></tbody></table></div>
+        </div>
+
+        <div class="pagination-container" id="pagination-container">
+            </div>
+
     </div>
 </div>
 
 <div id="dailyModal" class="modal-overlay" onclick="closeModal(event, 'dailyModal')">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <h3 id="modalTitle">🌟 1 Ramazan Özel İçerikleri</h3>
+            <h3 id="modalTitle">🌟 Günün İçerikleri</h3>
             <button class="modal-close" onclick="closeModal(null, 'dailyModal')">×</button>
         </div>
         <div class="modal-times" id="modalTimesContainer"></div>
         <div class="daily-banner-modal">
             <div class="banner-card">
-                <div class="banner-title">🍲 İftar Menüsü Önerisi</div>
-                <div class="menu-list">
-                    <div class="menu-item"><span class="menu-icon">🥣</span><span id="menuSoup">...</span></div>
-                    <div class="menu-item"><span class="menu-icon">🥘</span><span id="menuMain">...</span></div>
-                    <div class="menu-item"><span class="menu-icon">🍰</span><span id="menuDessert">...</span></div>
-                </div>
+                <div class="banner-title">📖 Günün Ayeti</div>
+                <div class="banner-content" id="dailyAyet">...</div>
+                <div class="banner-source" id="ayetSource">...</div>
             </div>
             <div class="banner-card">
-                <div class="banner-title">📖 Günün Sözü</div>
-                <div class="banner-content" id="dailyQuote">...</div>
-                <div class="banner-source" id="dailySource">...</div>
+                <div class="banner-title">📜 Günün Hadisi</div>
+                <div class="banner-content" id="dailyHadis">...</div>
+                <div class="banner-source" id="hadisSource">...</div>
             </div>
         </div>
     </div>
@@ -399,7 +408,10 @@
 
 <script>
     let currentZoom = 0.95;
+    let globalYearData = [];
     let allEvents = [];
+    let currentView = 'aylik'; 
+    let currentPage = 1;
     let countdownInterval;
     let warningPlayed = false;
     let zikirCount = 0;
@@ -407,38 +419,16 @@
     let isInitialLoad = true;
 
     const moonPhases = ["🌑","🌒","🌒","🌓","🌓","🌔","🌔","🌕","🌕","🌖","🌖","🌗","🌗","🌘","🌘","🌑"];
+    const hicriAylar = ["Muharrem", "Safer", "Rebiülevvel", "Rebiülahir", "Cemaziyelevvel", "Cemaziyelahir", "Recep", "Şaban", "Ramazan", "Şevval", "Zilkade", "Zilhicce"];
 
-    const ramadanContent = [
-        { soup: "Süzme Mercimek Çorbası", main: "Fırında Tavuk Patates", dessert: "Güllaç", quote: "Oruç, cehennem ateşinden koruyan bir kalkandır.", source: "Buhârî, Savm 2" },
-        { soup: "Ezogelin Çorbası", main: "Karnıyarık & Pirinç Pilavı", dessert: "Sütlaç", quote: "Kim inanarak ve sevabını umarak Ramazan orucunu tutarsa geçmiş günahları affolunur.", source: "Buhârî, Îmân 28" },
-        { soup: "Yayla Çorbası", main: "Orman Kebabı", dessert: "Revani", quote: "Oruçlunun rahatlaması için iki sevinç anı vardır: Biri iftar ettiği zaman, diğeri de Rabbine kavuştuğu zamandır.", source: "Müslim, Sıyâm 163" },
-        { soup: "Tarhana Çorbası", main: "İzmir Köfte", dessert: "Kemalpaşa Tatlısı", quote: "Sahur yemeği yiyin, zira sahurda bereket vardır.", source: "Buhârî, Savm 20" },
-        { soup: "Domates Çorbası", main: "Tas Kebabı", dessert: "Kadayıf", quote: "Oruçlu iken çirkin söz söylemeyin ve kimseyle çekişmeyin.", source: "Buhârî, Savm 9" },
-        { soup: "Mantar Çorbası", main: "Hünkâr Beğendi", dessert: "Şekerpare", quote: "Cennette Reyyân denilen bir kapı vardır ki, kıyamet günü oradan ancak oruçlular girecektir.", source: "Buhârî, Savm 4" },
-        { soup: "Düğün Çorbası", main: "Etli Kuru Fasulye", dessert: "Supangle", quote: "Ramazan ayı girdiğinde cennet kapıları açılır, cehennem kapıları kapanır ve şeytanlar bağlanır.", source: "Buhârî, Savm 5" },
-        { soup: "Şehriye Çorbası", main: "Tavuk Sote", dessert: "Trileçe", quote: "İnsanların en hayırlısı, insanlara faydalı olandır.", source: "Hadis-i Şerif" },
-        { soup: "Brokoli Çorbası", main: "Fırın Somon", dessert: "Profiterol", quote: "Kolaylaştırın, zorlaştırmayın; müjdeleyin, nefret ettirmeyin.", source: "Buhârî, İlim 11" },
-        { soup: "Tavuk Suyu Çorbası", main: "Alinazik", dessert: "Tavukgöğsü", quote: "Veren el, alan elden üstündür.", source: "Müslim, Zekât 94" },
-        { soup: "Kelle Paça Çorbası", main: "Kavurma & Şehriyeli Pilav", dessert: "Baklava", quote: "Müslümanın Müslümana tebessüm etmesi sadakadır.", source: "Tirmizi, Birr 36" },
-        { soup: "Ayran Aşı Çorbası", main: "Zeytinyağlı Taze Fasulye", dessert: "Kazandibi", quote: "Kim bir oruçluya iftar ettirirse, oruçlunun sevabı kadar sevap kazanır.", source: "Tirmizi, Savm 82" },
-        { soup: "Mahluta Çorbası", main: "Patlıcan Musakka", dessert: "Cevizli Sarma", quote: "Sadaka, Rabbinin öfkesini söndürür ve kötü ölümü bertaraf eder.", source: "Tirmizi, Zekât 28" },
-        { soup: "Lebeniye Çorbası", main: "Kağıt Kebabı", dessert: "İrmik Helvası", quote: "Sizin en hayırlınız, Kur'an'ı öğrenen ve öğretendir.", source: "Buhârî, Fezâilü'l-Kur'ân 21" },
-        { soup: "Kremalı Mantar Çorbası", main: "Fırın Makarna", dessert: "Kıbrıs Tatlısı", quote: "Güzel söz sadakadır.", source: "Buhârî, Edeb 34" },
-        { soup: "Yuvalama Çorbası", main: "Kayseri Tava", dessert: "Lokma Tatlısı", quote: "Allah, merhametli olanlara merhamet eder.", source: "Ebû Dâvûd, Edeb 58" },
-        { soup: "Tutmaç Çorbası", main: "Tavuklu Mantar Sote", dessert: "Fırın Sütlaç", quote: "Amellerin en hayırlısı, az da olsa devamlı olanıdır.", source: "Müslim, Müsâfirîn 218" },
-        { soup: "Közlenmiş Domates Çorbası", main: "Hasanpaşa Köfte", dessert: "Şöbiyet", quote: "Bir kimse kardeşinin ihtiyacını giderirse, Allah da onun ihtiyacını giderir.", source: "Buhârî, Mezâlim 3" },
-        { soup: "Sebze Çorbası", main: "Tepsi Kebabı", dessert: "Künefe", quote: "Sabır, imanın yarısıdır.", source: "Hadis-i Şerif" },
-        { soup: "Şafak Çorbası", main: "Etli Nohut", dessert: "Muhallebi", quote: "Hiçbiriniz kendi nefsi için istediğini kardeşi için de istemedikçe tam mümin olamaz.", source: "Buhârî, Îmân 7" },
-        { soup: "Ispanak Çorbası", main: "Zeytinyağlı Barbunya", dessert: "Zerde", quote: "Oruç, sabrın yarısıdır.", source: "İbn Mâce, Sıyâm 44" },
-        { soup: "Erişte Çorbası", main: "Tavuk Şiş", dessert: "Magnolia", quote: "İki nimet vardır ki, insanların çoğu bunların kıymetini bilmez: Sağlık ve boş vakit.", source: "Buhârî, Rikâk 1" },
-        { soup: "Kabak Çorbası", main: "Köfteli Patates Dizme", dessert: "Vişneli Turta", quote: "Dua, ibadetin özüdür.", source: "Tirmizi, Daavât 1" },
-        { soup: "Soğan Çorbası", main: "Çökertme Kebabı", dessert: "Soğuk Baklava", quote: "Şüphesiz Allah, affedicidir ve affetmeyi sever.", source: "Tirmizi, Daavât 84" },
-        { soup: "Mısır Çorbası", main: "Güveçte Et", dessert: "Krem Karamel", quote: "Kadir Gecesi'ni, faziletine inanarak ve sevabını umarak ihya edenin geçmiş günahları bağışlanır.", source: "Buhârî, Kadir 1" },
-        { soup: "Bamya Çorbası", main: "Misket Köfteli Bezelye", dessert: "İncir Uyutması", quote: "Kim Allah'a ve ahiret gününe inanıyorsa komşusuna iyilik etsin.", source: "Müslim, Îmân 74" },
-        { soup: "Tavuklu Şehriye Çorbası", main: "Şehzade Kebabı", dessert: "Kelek Tatlısı", quote: "Gerçek zenginlik mal çokluğu değil, gönül tokluğudur.", source: "Buhârî, Rikâk 15" },
-        { soup: "Semizotu Çorbası", main: "Eli Böğründe", dessert: "Bülbül Yuvası", quote: "İşçiye ücretini teri kurumadan veriniz.", source: "İbn Mâce, Rühûn 4" },
-        { soup: "Sütlü Kabak Çorbası", main: "Fırın Piliç", dessert: "Saray Sarması", quote: "Bayram, günahların bağışlandığı gündür.", source: "Hz. Ali (r.a.)" },
-        { soup: "Kırmızı Mercimek Çorbası", main: "Karışık Izgara", dessert: "Geleneksel Güllaç", quote: "Ramazan'ın sonu cehennemden azad olmaktır.", source: "İbn Huzeyme" }
+    const islamicContent = [
+        { ayet: "Şüphesiz namaz, müminlere belirli vakitlerde farz kılınmıştır.", ayetSource: "Nisâ, 103", hadis: "Amellerin en faziletlisi, vaktinde kılınan namazdır.", hadisSource: "Buhârî, Mevâkît 5" },
+        { ayet: "Beni anın ki, ben de sizi anayım...", ayetSource: "Bakara, 152", hadis: "Dua ibadetin ta kendisidir.", hadisSource: "Tirmizî, Daavât 1" },
+        { ayet: "Rabbinize yalvara yakara ve gizlice dua edin...", ayetSource: "A'râf, 55", hadis: "Allah, merhametli olanlara merhamet eder.", hadisSource: "Ebû Dâvûd, Edeb 58" },
+        { ayet: "İman edip salih ameller işleyenlere gelince, onlar için altından ırmaklar akan cennetler vardır.", ayetSource: "Burûc, 11", hadis: "Kolaylaştırın, zorlaştırmayın; müjdeleyin, nefret ettirmeyin.", hadisSource: "Buhârî, İlim 11" },
+        { ayet: "Sabredin! Şüphesiz Allah sabredenlerle beraberdir.", ayetSource: "Enfâl, 46", hadis: "Sabır, imanın yarısıdır.", hadisSource: "Ebû Nuaym" },
+        { ayet: "Allah, size emanetleri ehline vermenizi emreder.", ayetSource: "Nisâ, 58", hadis: "Bizi aldatan bizden değildir.", hadisSource: "Müslim, Îmân 164" },
+        { ayet: "De ki: Rabbim ilmimi artır.", ayetSource: "Tâhâ, 114", hadis: "İlim öğrenmek her Müslümana farzdır.", hadisSource: "İbn Mâce, Mukaddime 17" }
     ];
 
     function toggleFullScreen() {
@@ -566,7 +556,6 @@
         if(audio) { audio.currentTime = 0; audio.play().catch(e => console.log("Etkileşim gerekli")); }
     }
 
-    // --- DİYANET API ENTEGRASYONU ---
     async function loadCities() {
         try {
             const res = await fetch('https://ezanvakti.emushaf.net/sehirler/2');
@@ -585,7 +574,6 @@
             if (saved && JSON.parse(saved).city) {
                 citySelect.value = JSON.parse(saved).city;
             } else {
-                // Varsayılan olarak Rize'yi (583) bul ve seç
                 const defaultCity = cities.find(c => c.SehirAdi === "RİZE");
                 if (defaultCity) citySelect.value = defaultCity.SehirID;
             }
@@ -615,7 +603,6 @@
             if (saved && JSON.parse(saved).district && JSON.parse(saved).city === cityId) {
                 distSelect.value = JSON.parse(saved).district;
             } else {
-                // Varsayılan olarak Merkez ilçeyi bul
                 const defaultDist = districts.find(d => d.IlceAdi.includes("MERKEZ") || d.IlceAdi === document.getElementById('citySelect').options[document.getElementById('citySelect').selectedIndex].text);
                 if (defaultDist) distSelect.value = defaultDist.IlceID;
             }
@@ -633,34 +620,34 @@
         document.getElementById('moon').innerText = moonPhases[phaseIndex];
     }
 
-    function updateDailyContent(hDay) {
-        let index = hDay - 1;
-        if(index < 0) index = 0; if(index >= ramadanContent.length) index = ramadanContent.length - 1;
-        const data = ramadanContent[index];
-        document.getElementById('modalTitle').innerHTML = `🌟 ${hDay} Ramazan Özel İçerikleri`;
-        document.getElementById('menuSoup').innerText = data.soup;
-        document.getElementById('menuMain').innerText = data.main;
-        document.getElementById('menuDessert').innerText = data.dessert;
-        document.getElementById('dailyQuote').innerText = `"${data.quote}"`;
-        document.getElementById('dailySource').innerText = `- ${data.source}`;
+    function updateDailyContent(dayIndex) {
+        let index = dayIndex % islamicContent.length;
+        if(index < 0) index = 0;
+        const data = islamicContent[index];
+        document.getElementById('modalTitle').innerHTML = `🌟 Günün İçerikleri`;
+        document.getElementById('dailyAyet').innerText = `"${data.ayet}"`;
+        document.getElementById('ayetSource').innerText = `- ${data.ayetSource}`;
+        document.getElementById('dailyHadis').innerText = `"${data.hadis}"`;
+        document.getElementById('hadisSource').innerText = `- ${data.hadisSource}`;
     }
 
-    function selectDay(el, h, im, gu, og, ik, ak, ya, isToday=false) {
+    function selectDay(el, index, hicri, miladi, im, gu, og, ik, ak, ya, isToday=false, isUserClick=false) {
         document.querySelectorAll('tr').forEach(tr => tr.classList.remove('selected-row'));
         if(el) el.classList.add('selected-row');
         
         window.isTodayView = isToday;
-        document.getElementById('selectedDayTitle').innerText = isToday ? "🗓️ Bugünün Vakit Saatleri" : `🗓️ ${h} Ramazan Vakit Saatleri`;
+        document.getElementById('selectedDayTitle').innerText = isToday ? "🗓️ Bugünün Vakit Saatleri" : `🗓️ Seçilen Günün Vakitleri`;
         
-        updateMoonPhase(h);
-        updateDailyContent(h);
+        let hicriDay = parseInt(hicri.split(' ')[0]);
+        updateMoonPhase(hicriDay);
+        updateDailyContent(index);
 
         document.getElementById('todayTimesContainer').innerHTML = `
             <div class="time-row" data-time="${im}"><span>İmsak</span><span>${im}</span></div>
             <div class="time-row" data-time="${gu}"><span>Güneş</span><span>${gu}</span></div>
             <div class="time-row" data-time="${og}"><span>Öğle</span><span>${og}</span></div>
             <div class="time-row" data-time="${ik}"><span>İkindi</span><span>${ik}</span></div>
-            <div class="time-row iftar" data-time="${ak}"><span>İftar (Akşam)</span><span>${ak}</span></div>
+            <div class="time-row iftar" data-time="${ak}"><span>Akşam</span><span>${ak}</span></div>
             <div class="time-row" data-time="${ya}"><span>Yatsı</span><span>${ya}</span></div>
         `;
 
@@ -669,56 +656,39 @@
             <div class="modal-time-box"><div class="modal-time-name">Güneş</div><div class="modal-time-val">${gu}</div></div>
             <div class="modal-time-box"><div class="modal-time-name">Öğle</div><div class="modal-time-val">${og}</div></div>
             <div class="modal-time-box"><div class="modal-time-name">İkindi</div><div class="modal-time-val">${ik}</div></div>
-            <div class="modal-time-box iftar-box"><div class="modal-time-name">İftar</div><div class="modal-time-val">${ak}</div></div>
+            <div class="modal-time-box iftar-box"><div class="modal-time-name">Akşam</div><div class="modal-time-val">${ak}</div></div>
             <div class="modal-time-box"><div class="modal-time-name">Yatsı</div><div class="modal-time-val">${ya}</div></div>
         `;
         
-        if(!isInitialLoad) openModal();
+        if (isUserClick) {
+            openModal();
+        }
     }
 
-    // Gelişmiş Diyanet Çekirdek Motoru (Eksik günleri Aladhan ile milimetrik tamamlar)
     async function getMonthlyTimings() {
         saveSettings();
         const distId = document.getElementById('districtSelect').value;
+        const cityName = document.getElementById('citySelect').options[document.getElementById('citySelect').selectedIndex].text;
+        const year = new Date().getFullYear();
         if(!distId) return;
-
-        const tbody1 = document.getElementById('tbody1'); const tbody2 = document.getElementById('tbody2');
-        tbody1.innerHTML = ''; tbody2.innerHTML = ''; allEvents = [];
         
         try {
-            // 1. Diyanet Verisini Çek
             const dRes = await fetch('https://ezanvakti.emushaf.net/vakitler/' + distId);
             const dDataAll = await dRes.json();
             
-            // Sadece Ramazan Günlerini Al (9. Ay)
-            const dData = dDataAll.filter(d => parseInt(d.HicriTarihKisa.split('.')[1]) === 9);
+            const alRes = await fetch(`https://api.aladhan.com/v1/calendarByCity/${year}?city=${encodeURIComponent(cityName)}&country=Turkey&method=13`);
+            const alDataAll = await alRes.json();
             
-            // Bayram Namazını Çek (10. Ayın 1. Günü)
-            const bayramDay = dDataAll.find(d => parseInt(d.HicriTarihKisa.split('.')[1]) === 10 && parseInt(d.HicriTarihKisa.split('.')[0]) === 1);
-            if (bayramDay) {
-                const [h, m] = bayramDay.Gunes.split(':').map(Number);
-                let bD = new Date(); bD.setHours(h, m + 38, 0, 0); // Diyanet Kuralı: Güneş + 38dk
-                document.getElementById('bayramTime').innerText = String(bD.getHours()).padStart(2,'0') + ':' + String(bD.getMinutes()).padStart(2,'0');
-            } else {
-                document.getElementById('bayramTime').innerText = "06:53"; 
+            let aladhanDays = [];
+            for(let m=1; m<=12; m++) {
+                if(alDataAll.data[m]) aladhanDays = aladhanDays.concat(alDataAll.data[m]);
             }
 
-            // 2. Aladhan Verisini Çek (Eksik geçmiş günleri tamamlamak için)
-            const cityName = document.getElementById('citySelect').options[document.getElementById('citySelect').selectedIndex].text;
-            const [alF, alM] = await Promise.all([
-                fetch(`https://api.aladhan.com/v1/calendarByCity/2026/2?city=${encodeURIComponent(cityName)}&country=Turkey&method=13`),
-                fetch(`https://api.aladhan.com/v1/calendarByCity/2026/3?city=${encodeURIComponent(cityName)}&country=Turkey&method=13`)
-            ]);
-            const alFData = await alF.json(); const alMData = await alM.json();
-            const aladhanDays = [...alFData.data, ...alMData.data];
-
             let deltas = { im: 0, gu: 0, og: 0, ik: 0, ak: 0, ya: 0 };
-            
-            // Matematiksel Delta (Fark) Hesaplaması
-            if (dData.length > 0) {
-                const firstD = dData[0];
-                const [dd, mm, yy] = firstD.MiladiTarihKisa.split('.');
-                const matchAladhan = aladhanDays.find(a => a.date.gregorian.date === `${dd}-${mm}-${yy}`);
+            if (dDataAll.length > 0) {
+                const firstD = dDataAll[0];
+                const dDayStr = firstD.MiladiTarihKisa.replace(/\./g, '-');
+                const matchAladhan = aladhanDays.find(a => a.date.gregorian.date === dDayStr);
                 
                 if (matchAladhan) {
                     const getMins = (str) => { const [h, m] = str.split(' ')[0].split(':'); return parseInt(h)*60 + parseInt(m); };
@@ -731,75 +701,163 @@
                 }
             }
 
-            let fullMonth = [];
-            const ramadanStart = new Date('2026-02-19T00:00:00'); // Ramazan Başlangıcı 2026
-            
-            for (let i = 0; i < 29; i++) {
-                let curDate = new Date(ramadanStart);
-                curDate.setDate(curDate.getDate() + i);
-                
-                const dd = String(curDate.getDate()).padStart(2, '0');
-                const mm = String(curDate.getMonth() + 1).padStart(2, '0');
-                const yy = curDate.getFullYear();
-                
-                const dDay = dData.find(d => d.MiladiTarihKisa === `${dd}.${mm}.${yy}`);
-                
-                if (dDay) {
-                    fullMonth.push({ hDay: i + 1, mDate: dDay.MiladiTarihKisa, im: dDay.Imsak, gu: dDay.Gunes, og: dDay.Ogle, ik: dDay.Ikindi, ak: dDay.Aksam, ya: dDay.Yatsi });
-                } else {
-                    const aDay = aladhanDays.find(a => a.date.gregorian.date === `${dd}-${mm}-${yy}`);
-                    if (aDay) {
-                        const addMins = (str, mins) => {
-                            const [h, m] = str.split(' ')[0].split(':').map(Number);
-                            let dt = new Date(); dt.setHours(h, m + mins, 0, 0);
-                            return String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0');
-                        };
-                        fullMonth.push({ hDay: i + 1, mDate: `${dd}.${mm}.${yy}`, 
-                            im: addMins(aDay.timings.Imsak, deltas.im), gu: addMins(aDay.timings.Sunrise, deltas.gu), 
-                            og: addMins(aDay.timings.Dhuhr, deltas.og), ik: addMins(aDay.timings.Asr, deltas.ik), 
-                            ak: addMins(aDay.timings.Maghrib, deltas.ak), ya: addMins(aDay.timings.Isha, deltas.ya) 
-                        });
-                    }
-                }
-            }
+            globalYearData = aladhanDays.map((aDay, index) => {
+                const addMins = (str, mins) => {
+                    const [h, m] = str.split(' ')[0].split(':').map(Number);
+                    let dt = new Date(); dt.setHours(h, m + mins, 0, 0);
+                    return String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0');
+                };
 
-            const todayObjDate = new Date();
-            const todayStr = String(todayObjDate.getDate()).padStart(2, '0') + '.' + String(todayObjDate.getMonth() + 1).padStart(2, '0') + '.' + todayObjDate.getFullYear();
-            const mid = Math.ceil(fullMonth.length / 2);
-            let todayRef = null;
-            
-            fullMonth.forEach((v, i) => {
+                const hMonthIndex = aDay.date.hijri.month.number - 1;
+                const hicriStr = `${aDay.date.hijri.day} ${hicriAylar[hMonthIndex]} ${aDay.date.hijri.year}`;
+                const mDate = aDay.date.gregorian.date.replace(/\-/g, '.');
+                
+                return {
+                    index: index,
+                    hicriStr: hicriStr,
+                    mDate: mDate,
+                    im: addMins(aDay.timings.Imsak, deltas.im),
+                    gu: addMins(aDay.timings.Sunrise, deltas.gu),
+                    og: addMins(aDay.timings.Dhuhr, deltas.og),
+                    ik: addMins(aDay.timings.Asr, deltas.ik),
+                    ak: addMins(aDay.timings.Maghrib, deltas.ak),
+                    ya: addMins(aDay.timings.Isha, deltas.ya),
+                    rawDateObj: new Date(aDay.date.gregorian.year, aDay.date.gregorian.month.number - 1, aDay.date.gregorian.day)
+                };
+            });
+
+            allEvents = [];
+            globalYearData.forEach(v => {
                 const [d, m, y] = v.mDate.split('.');
                 const makeD = (ts) => new Date(`${y}-${m}-${d}T${ts}:00`);
-                
                 allEvents.push(
                     { n: 'İmsak', t: makeD(v.im), isFast: true },
                     { n: 'Güneş', t: makeD(v.gu), isFast: false },
                     { n: 'Öğle', t: makeD(v.og), isFast: false },
                     { n: 'İkindi', t: makeD(v.ik), isFast: false },
-                    { n: 'İftar', t: makeD(v.ak), isFast: true, isI: true },
+                    { n: 'Akşam', t: makeD(v.ak), isFast: true, isI: true },
                     { n: 'Yatsı', t: makeD(v.ya), isFast: false }
                 );
-
-                const isT = (v.mDate === todayStr);
-                const row = document.createElement('tr');
-                if(isT) row.className = 'today-row';
-                
-                row.onclick = () => selectDay(row, v.hDay, v.im, v.gu, v.og, v.ik, v.ak, v.ya, isT);
-                row.innerHTML = `<td class="date-hicri">${v.hDay} Ramazan</td><td class="date-miladi">${d} ${["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"][parseInt(m)-1]}</td><td>${v.im}</td><td>${v.gu}</td><td>${v.og}</td><td>${v.ik}</td><td class="iftar-col">${v.ak}</td><td>${v.ya}</td>`;
-                
-                if(i < mid) tbody1.appendChild(row); else tbody2.appendChild(row);
-                if(isT) todayRef = row; 
             });
 
-            if(todayRef) todayRef.click();
-            else if(fullMonth.length > 0) tbody1.firstChild.click();
+            renderTable(currentView);
             
-            isInitialLoad = false;
-            startCountdown();
+            if(isInitialLoad) {
+                isInitialLoad = false;
+                startCountdown();
+            }
 
         } catch (e) { 
             console.log("Veri çekilemedi:", e); 
+        }
+    }
+
+    function changeView(viewType) {
+        currentView = viewType;
+        if(viewType === 'yillik') {
+            currentPage = new Date().getMonth() + 1; // Bulunduğun ayı açar
+        }
+        document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('btn-' + viewType).classList.add('active');
+        renderTable(viewType);
+    }
+
+    function renderTable(viewType) {
+        const tbody1 = document.getElementById('tbody1'); 
+        const tbody2 = document.getElementById('tbody2');
+        const tablesWrapper = document.getElementById('tablesWrapper');
+        tbody1.innerHTML = ''; tbody2.innerHTML = ''; 
+        
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        
+        let filteredData = [];
+        document.getElementById('pagination-container').style.display = 'none';
+
+        if (viewType === 'haftalik') {
+            tablesWrapper.classList.add('single-col'); 
+            const endDate = new Date(today);
+            endDate.setDate(today.getDate() + 6); 
+            filteredData = globalYearData.filter(d => d.rawDateObj >= today && d.rawDateObj <= endDate);
+        } else if (viewType === 'aylik') {
+            tablesWrapper.classList.remove('single-col'); 
+            const currentMonth = today.getMonth();
+            filteredData = globalYearData.filter(d => d.rawDateObj.getMonth() === currentMonth);
+        } else if (viewType === 'yillik') {
+            tablesWrapper.classList.remove('single-col'); 
+            document.getElementById('pagination-container').style.display = 'flex';
+            
+            let monthIndex = currentPage - 1;
+            filteredData = globalYearData.filter(d => d.rawDateObj.getMonth() === monthIndex);
+            
+            let startIndex = globalYearData.indexOf(filteredData[0]);
+            let endIndex = startIndex + filteredData.length;
+            let totalItems = globalYearData.length;
+            let totalPages = 12;
+
+            renderPagination(totalItems, startIndex, endIndex, totalPages);
+        }
+
+        const todayStr = String(today.getDate()).padStart(2, '0') + '.' + String(today.getMonth() + 1).padStart(2, '0') + '.' + today.getFullYear();
+        
+        let mid = viewType === 'haftalik' ? filteredData.length : Math.ceil(filteredData.length / 2);
+        
+        let todayRef = null;
+        let todayData = null;
+
+        filteredData.forEach((v, i) => {
+            const [d, m, y] = v.mDate.split('.');
+            const isT = (v.mDate === todayStr);
+            const row = document.createElement('tr');
+            if(isT) row.className = 'today-row';
+            
+            row.addEventListener('click', () => selectDay(row, v.index, v.hicriStr, v.mDate, v.im, v.gu, v.og, v.ik, v.ak, v.ya, isT, true));
+            row.innerHTML = `<td class="date-hicri">${v.hicriStr}</td><td class="date-miladi">${d} ${["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"][parseInt(m)-1]}</td><td>${v.im}</td><td>${v.gu}</td><td>${v.og}</td><td>${v.ik}</td><td class="iftar-col">${v.ak}</td><td>${v.ya}</td>`;
+            
+            if(i < mid) tbody1.appendChild(row); else tbody2.appendChild(row);
+            
+            if(isT) { todayRef = row; todayData = v; }
+        });
+
+        if(todayRef) {
+            selectDay(todayRef, todayData.index, todayData.hicriStr, todayData.mDate, todayData.im, todayData.gu, todayData.og, todayData.ik, todayData.ak, todayData.ya, true, false);
+            setTimeout(() => todayRef.scrollIntoView({behavior: "smooth", block: "center"}), 100);
+        } else if(filteredData.length > 0) {
+            let fData = filteredData[0];
+            selectDay(tbody1.firstChild, fData.index, fData.hicriStr, fData.mDate, fData.im, fData.gu, fData.og, fData.ik, fData.ak, fData.ya, false, false);
+        }
+    }
+
+    function renderPagination(totalItems, startIndex, endIndex, totalPages) {
+        const container = document.getElementById('pagination-container');
+        let html = `<div class="page-info">${totalItems} kayıttan ${startIndex + 1} - ${endIndex} arasındaki kayıtlar gösteriliyor</div>`;
+
+        let controls = `<div class="page-controls">`;
+        controls += `<button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>Önceki</button>`;
+
+        let pagesHtml = '';
+        let lastAdded = 0;
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                if (lastAdded > 0 && lastAdded + 1 !== i) {
+                    pagesHtml += `<span style="padding: 0 5px; color: var(--text-muted); font-weight: bold;">...</span>`;
+                }
+                pagesHtml += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+                lastAdded = i;
+            }
+        }
+
+        controls += pagesHtml;
+        controls += `<button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Sonraki</button>`;
+        controls += `</div>`;
+
+        container.innerHTML = html + controls;
+    }
+
+    window.changePage = function(page) {
+        if(page >= 1 && page <= 12) {
+            currentPage = page;
+            renderTable('yillik');
         }
     }
 
@@ -864,7 +922,7 @@
                         const selectedSound = document.getElementById('soundSelect').value;
                         document.getElementById(selectedSound).play().catch(e => console.log("Ses oynatma engellendi:", e));
                     }
-                    sendPushNotification(`🔔 ${next.n} Vakti!`, `${document.getElementById('districtSelect').options[document.getElementById('districtSelect').selectedIndex].text} için ${next.n} vakti girdi. Hayırlı Ramazanlar!`);
+                    sendPushNotification(`🔔 ${next.n} Vakti!`, `${document.getElementById('districtSelect').options[document.getElementById('districtSelect').selectedIndex].text} için ${next.n} vakti girdi.`);
                 }
             }
 
@@ -894,7 +952,7 @@
                 
                 document.getElementById('progressContainer').style.display = 'block';
                 document.getElementById('progressBar').style.width = percentage + '%';
-                document.getElementById('progressText').innerText = `Oruç İlerlemesi: %${percentage.toFixed(1)}`;
+                document.getElementById('progressText').innerText = `Gün İlerlemesi: %${percentage.toFixed(1)}`;
             } else {
                 document.getElementById('progressContainer').style.display = 'none';
             }
@@ -916,7 +974,7 @@
    window.onload = async () => {
         loadSettings();
         loadZikir();
-        await loadCities(); // Şehirleri ve ardından İlçeleri yükler, en son getMonthlyTimings'i tetikler.
+        await loadCities();
         
         updateLiveDateTime();
         setInterval(updateLiveDateTime, 1000);
