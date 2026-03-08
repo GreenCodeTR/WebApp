@@ -42,7 +42,7 @@
         body {
             font-family: 'Outfit', 'Segoe UI', sans-serif;
             background-color: var(--bg-color); color: var(--text-color);
-            margin: 0; padding: 15px 20px; min-height: 100vh; display: flex; flex-direction: column;
+            margin: 0; padding: 15px 20px 0 20px; min-height: 100vh; display: flex; flex-direction: column;
             align-items: center; box-sizing: border-box; overflow-y: auto; overflow-x: hidden; transition: all 0.3s ease;
         }
         
@@ -60,7 +60,7 @@
 
         .main-wrapper {
             display: grid; grid-template-columns: 360px 1fr; gap: 25px; width: 100%;
-            height: calc(100vh - 90px); transition: zoom 0.2s ease;
+            height: calc(100vh - 130px); transition: zoom 0.2s ease;
         }
         
         .panel { background: var(--panel-bg); padding: 15px 20px; border-radius: 16px; box-shadow: 0 8px 25px rgba(0,0,0,0.25); display: flex; flex-direction: column; position: relative; }
@@ -126,16 +126,17 @@
         .view-btn:hover { background: var(--hover-bg); }
         .view-btn.active { background: rgba(56, 189, 248, 0.15); color: var(--accent); border-color: var(--accent); }
 
-        .tables-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex-grow: 1; height: 100%; min-height: 0; overflow-y: auto;}
-        .tables-wrapper.single-col { display: block; }
-.tables-wrapper.single-col #table1-container { max-width: 850px; } /* Sağdan kısmak için genişliği sınırladık */
-.tables-wrapper.single-col #table2-container { display: none; }
+        /* AYLIK GÖRÜNÜM AY SEÇİCİ */
+        .month-nav-container { display: none; justify-content: space-between; align-items: center; background: var(--table-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 10px 20px; }
+        .month-nav-container.active { display: flex; }
+        #currentMonthLabel { font-weight: 800; font-size: 1.2em; color: var(--accent); text-transform: uppercase; }
 
-/* --- HAFTALIK GÖRÜNÜM SIKIŞTIRMA (YENİ EKLENEN KODLAR) --- */
-.tables-wrapper.single-col { display: flex; justify-content: center; }
-.tables-wrapper.single-col #table1-container { max-width: 1200px; width: 100%; }
-.tables-wrapper.single-col #table2-container { display: none; }
-/* --------------------------------------------------------- */
+        .tables-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex-grow: 1; height: 100%; min-height: 0; overflow-y: auto;}
+        
+        /* HAFTALIK GÖRÜNÜM ORTALAMA VE DARALTMA */
+        .tables-wrapper.single-col { display: flex; justify-content: center; }
+        .tables-wrapper.single-col #table1-container { max-width: 1200px; width: 100%; }
+        .tables-wrapper.single-col #table2-container { display: none; }
         
         /* Tablonun yüksekliğini kapsayıcıya yayma komutu */
         .table-card { border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); background-color: var(--table-bg); display: flex; flex-direction: column; height: 100%; }
@@ -158,6 +159,10 @@
         .page-btn:hover:not(:disabled) { background: var(--hover-bg); }
         .page-btn.active { background: rgba(56, 189, 248, 0.15); color: var(--accent); border-color: var(--accent); }
         .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* FOOTER SAYAÇ STİLLERİ */
+        .site-footer { width: 100%; text-align: center; padding: 15px 0; margin-top: auto; color: var(--text-muted); font-size: 0.95em; font-weight: 600; border-top: 1px dashed var(--border-color); }
+        .site-footer strong { color: var(--accent); font-size: 1.1em; letter-spacing: 1px; }
 
         /* MODAL STİLLERİ */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
@@ -211,6 +216,7 @@
             .tdv-grid { grid-template-columns: 1fr; } 
             table { font-size: 0.85em; } 
             .view-tabs { flex-direction: column; }
+            .month-nav-container { flex-direction: column; gap: 10px; }
         }
         @media (max-height: 650px) {
             body { height: auto !important; min-height: 100vh; overflow-y: auto !important; display: block; }
@@ -337,6 +343,12 @@
             <button id="btn-yillik" class="view-btn" onclick="changeView('yillik')">🌍 Yıllık Görünüm</button>
         </div>
 
+        <div class="month-nav-container" id="monthNavContainer">
+            <button class="page-btn" id="prevMonthBtn" onclick="changeMonth(-1)">◀ Önceki Ay</button>
+            <span id="currentMonthLabel">Ocak</span>
+            <button class="page-btn" id="nextMonthBtn" onclick="changeMonth(1)">Sonraki Ay ▶</button>
+        </div>
+
         <div class="tables-wrapper" id="tablesWrapper">
             <div class="table-card" id="table1-container"><table id="table1"><thead><tr><th>Hicri (1447)</th><th>Miladi (2026)</th><th>İmsak</th><th>Güneş</th><th>Öğle</th><th>İkindi</th><th class="iftar-col">Akşam</th><th>Yatsı</th></tr></thead><tbody id="tbody1"></tbody></table></div>
             <div class="table-card" id="table2-container"><table id="table2"><thead><tr><th>Hicri (1447)</th><th>Miladi (2026)</th><th>İmsak</th><th>Güneş</th><th>Öğle</th><th>İkindi</th><th class="iftar-col">Akşam</th><th>Yatsı</th></tr></thead><tbody id="tbody2"></tbody></table></div>
@@ -346,6 +358,10 @@
             </div>
 
     </div>
+</div>
+
+<div class="site-footer">
+    🌍 Toplam Site Ziyaretçisi: <strong id="visitCount">Yükleniyor...</strong>
 </div>
 
 <div id="dailyModal" class="modal-overlay" onclick="closeModal(event, 'dailyModal')">
@@ -419,6 +435,7 @@
     let allEvents = [];
     let currentView = 'aylik'; 
     let currentPage = 1;
+    let selectedMonthIndex = new Date().getMonth(); // Aylık görünüm için seçili ay
     let countdownInterval;
     let warningPlayed = false;
     let zikirCount = 0;
@@ -448,6 +465,20 @@
         if (document.fullscreenElement) fsBtn.innerHTML = "🔳 Çıkış Yap";
         else fsBtn.innerHTML = "🔲 Tam Ekran";
     });
+
+    // Ziyaretçi Sayacı (API veya Local Fallback)
+    async function fetchVisitorCount() {
+        try {
+            const res = await fetch('https://api.counterapi.dev/v1/namazvaktiasistani/ziyaret/up');
+            const data = await res.json();
+            document.getElementById('visitCount').innerText = data.count.toLocaleString('tr-TR');
+        } catch(e) {
+            let visits = localStorage.getItem('local_visits') || 15420;
+            visits = parseInt(visits) + 1;
+            localStorage.setItem('local_visits', visits);
+            document.getElementById('visitCount').innerText = visits.toLocaleString('tr-TR');
+        }
+    }
 
     async function fetchLiveGoldPrice() {
         const indicator = document.getElementById('goldLiveIndicator');
@@ -759,10 +790,20 @@
         }
     }
 
+    // AYLIK GÖRÜNÜMDE AY DEĞİŞTİRME FONKSİYONU
+    window.changeMonth = function(dir) {
+        selectedMonthIndex += dir;
+        if(selectedMonthIndex < 0) selectedMonthIndex = 0;
+        if(selectedMonthIndex > 11) selectedMonthIndex = 11;
+        renderTable('aylik');
+    };
+
     function changeView(viewType) {
         currentView = viewType;
         if(viewType === 'yillik') {
             currentPage = new Date().getMonth() + 1; // Bulunduğun ayı açar
+        } else if (viewType === 'aylik') {
+            selectedMonthIndex = new Date().getMonth(); // Aylık görünüme girince bulunduğun ayı açar
         }
         document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById('btn-' + viewType).classList.add('active');
@@ -773,6 +814,8 @@
         const tbody1 = document.getElementById('tbody1'); 
         const tbody2 = document.getElementById('tbody2');
         const tablesWrapper = document.getElementById('tablesWrapper');
+        const monthNav = document.getElementById('monthNavContainer');
+        
         tbody1.innerHTML = ''; tbody2.innerHTML = ''; 
         
         const today = new Date();
@@ -783,15 +826,28 @@
 
         if (viewType === 'haftalik') {
             tablesWrapper.classList.add('single-col'); 
+            monthNav.classList.remove('active');
             const endDate = new Date(today);
             endDate.setDate(today.getDate() + 6); 
             filteredData = globalYearData.filter(d => d.rawDateObj >= today && d.rawDateObj <= endDate);
+            
         } else if (viewType === 'aylik') {
             tablesWrapper.classList.remove('single-col'); 
-            const currentMonth = today.getMonth();
-            filteredData = globalYearData.filter(d => d.rawDateObj.getMonth() === currentMonth);
+            monthNav.classList.add('active'); // Aylık görünümde ay değiştiriciyi göster
+            
+            filteredData = globalYearData.filter(d => d.rawDateObj.getMonth() === selectedMonthIndex);
+            
+            // Ay etiketini güncelle
+            const aylar = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+            document.getElementById('currentMonthLabel').innerText = aylar[selectedMonthIndex] + " " + today.getFullYear();
+            
+            // Sınır butonlarını ayarla
+            document.getElementById('prevMonthBtn').disabled = (selectedMonthIndex === 0);
+            document.getElementById('nextMonthBtn').disabled = (selectedMonthIndex === 11);
+
         } else if (viewType === 'yillik') {
             tablesWrapper.classList.remove('single-col'); 
+            monthNav.classList.remove('active');
             document.getElementById('pagination-container').style.display = 'flex';
             
             let monthIndex = currentPage - 1;
@@ -818,11 +874,8 @@
             const row = document.createElement('tr');
             if(isT) row.className = 'today-row';
             
-            // Format Hicri (Yılı kaldır: "19 Ramazan 1447" -> "19 Ramazan")
             const hicriParts = v.hicriStr.split(' ');
             const simplifiedHicri = `${hicriParts[0]} ${hicriParts[1]}`;
-            
-            // Format Miladi (Yılı kaldır: "08 Mar")
             const simplifiedMiladi = `${d} ${["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"][parseInt(m)-1]}`;
 
             row.addEventListener('click', () => selectDay(row, v.index, v.hicriStr, v.mDate, v.im, v.gu, v.og, v.ik, v.ak, v.ya, isT, true));
@@ -988,6 +1041,7 @@
    window.onload = async () => {
         loadSettings();
         loadZikir();
+        fetchVisitorCount(); // Ziyaretçi sayacını tetikle
         await loadCities();
         
         updateLiveDateTime();
