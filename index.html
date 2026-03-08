@@ -127,8 +127,15 @@
         .view-btn.active { background: rgba(56, 189, 248, 0.15); color: var(--accent); border-color: var(--accent); }
 
         .tables-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex-grow: 1; height: 100%; min-height: 0; overflow-y: auto;}
-        .tables-wrapper.single-col { grid-template-columns: 1fr; }
-        .tables-wrapper.single-col #table2-container { display: none; }
+        .tables-wrapper.single-col { display: block; }
+.tables-wrapper.single-col #table1-container { max-width: 850px; } /* Sağdan kısmak için genişliği sınırladık */
+.tables-wrapper.single-col #table2-container { display: none; }
+
+/* --- HAFTALIK GÖRÜNÜM SIKIŞTIRMA (YENİ EKLENEN KODLAR) --- */
+.tables-wrapper.single-col { display: flex; justify-content: center; }
+.tables-wrapper.single-col #table1-container { max-width: 1200px; width: 100%; }
+.tables-wrapper.single-col #table2-container { display: none; }
+/* --------------------------------------------------------- */
         
         /* Tablonun yüksekliğini kapsayıcıya yayma komutu */
         .table-card { border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); background-color: var(--table-bg); display: flex; flex-direction: column; height: 100%; }
@@ -331,8 +338,8 @@
         </div>
 
         <div class="tables-wrapper" id="tablesWrapper">
-            <div class="table-card" id="table1-container"><table id="table1"><thead><tr><th>Hicri</th><th>Miladi</th><th>İmsak</th><th>Güneş</th><th>Öğle</th><th>İkindi</th><th class="iftar-col">Akşam</th><th>Yatsı</th></tr></thead><tbody id="tbody1"></tbody></table></div>
-            <div class="table-card" id="table2-container"><table id="table2"><thead><tr><th>Hicri</th><th>Miladi</th><th>İmsak</th><th>Güneş</th><th>Öğle</th><th>İkindi</th><th class="iftar-col">Akşam</th><th>Yatsı</th></tr></thead><tbody id="tbody2"></tbody></table></div>
+            <div class="table-card" id="table1-container"><table id="table1"><thead><tr><th>Hicri (1447)</th><th>Miladi (2026)</th><th>İmsak</th><th>Güneş</th><th>Öğle</th><th>İkindi</th><th class="iftar-col">Akşam</th><th>Yatsı</th></tr></thead><tbody id="tbody1"></tbody></table></div>
+            <div class="table-card" id="table2-container"><table id="table2"><thead><tr><th>Hicri (1447)</th><th>Miladi (2026)</th><th>İmsak</th><th>Güneş</th><th>Öğle</th><th>İkindi</th><th class="iftar-col">Akşam</th><th>Yatsı</th></tr></thead><tbody id="tbody2"></tbody></table></div>
         </div>
 
         <div class="pagination-container" id="pagination-container">
@@ -811,8 +818,15 @@
             const row = document.createElement('tr');
             if(isT) row.className = 'today-row';
             
+            // Format Hicri (Yılı kaldır: "19 Ramazan 1447" -> "19 Ramazan")
+            const hicriParts = v.hicriStr.split(' ');
+            const simplifiedHicri = `${hicriParts[0]} ${hicriParts[1]}`;
+            
+            // Format Miladi (Yılı kaldır: "08 Mar")
+            const simplifiedMiladi = `${d} ${["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"][parseInt(m)-1]}`;
+
             row.addEventListener('click', () => selectDay(row, v.index, v.hicriStr, v.mDate, v.im, v.gu, v.og, v.ik, v.ak, v.ya, isT, true));
-            row.innerHTML = `<td class="date-hicri">${v.hicriStr}</td><td class="date-miladi">${d} ${["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"][parseInt(m)-1]}</td><td>${v.im}</td><td>${v.gu}</td><td>${v.og}</td><td>${v.ik}</td><td class="iftar-col">${v.ak}</td><td>${v.ya}</td>`;
+            row.innerHTML = `<td class="date-hicri">${simplifiedHicri}</td><td class="date-miladi">${simplifiedMiladi}</td><td>${v.im}</td><td>${v.gu}</td><td>${v.og}</td><td>${v.ik}</td><td class="iftar-col">${v.ak}</td><td>${v.ya}</td>`;
             
             if(i < mid) tbody1.appendChild(row); else tbody2.appendChild(row);
             
