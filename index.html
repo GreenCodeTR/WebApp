@@ -99,7 +99,7 @@
         .btn-action:hover { background-color: var(--hover-bg); border-color: var(--accent); color: var(--accent); }
         .sound-toggle-row { display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--panel-bg); padding: 8px; border-radius: 10px; border: 1px solid var(--border-color); cursor: pointer; font-size: 0.9em; font-weight: 600; height: 42px; margin: 0; box-sizing: border-box; transition: 0.2s; width: 100%;}
         .sound-toggle-row:hover { border-color: var(--accent); }
-        .btn-fullscreen-settings { display: flex; align-items: center; justify-content: center; background: var(--panel-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 8px; border-radius: 10px; cursor: pointer; font-size: 0.9em; font-weight: 600; transition: 0.2s; height: 42px; margin: 0; box-sizing: border-box; width: 100%;}
+        .btn-fullscreen-settings { display: flex; align-items: center; justify-content: center; background: var(--panel-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 8px; border-radius: 10px; cursor: pointer; font-size: 0.85em; font-weight: 600; transition: 0.2s; height: 42px; margin: 0; box-sizing: border-box; width: 100%;}
         .btn-fullscreen-settings:hover { border-color: var(--accent); color: var(--accent); }
         
         /* GPS Butonu */
@@ -200,7 +200,7 @@
         .compass-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 0;}
         .compass-circle { width: 250px; height: 250px; border: 8px solid var(--border-color); border-radius: 50%; position: relative; display: flex; align-items: center; justify-content: center; background: var(--bg-color); box-shadow: inset 0 0 20px rgba(0,0,0,0.05); transition: transform 0.1s linear;}
         .compass-north { position: absolute; top: 10px; font-weight: 900; color: #ef4444; font-size: 1.2em; }
-        .compass-qibla-marker { position: absolute; font-size: 2em; }
+        .compass-qibla-marker { position: absolute; font-size: 2.5em; }
         .compass-info { text-align: center; margin-top: 20px; font-size: 0.9em; color: var(--text-muted); }
         .btn-permission { padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 15px; }
 
@@ -331,6 +331,7 @@
                             <div style="display: flex; gap: 5px;">
                                 <button class="btn-fullscreen-settings" onclick="toggleFullScreen()" id="fsBtn" style="flex: 1;">🔲 Tam Ekran</button>
                                 <button class="btn-fullscreen-settings" style="flex: 1; color: var(--accent); border-color: var(--accent);" onclick="requestNotificationPermission()" title="Bildirim İzni Al">📱 İzin</button>
+                                <button id="installAppBtn" class="btn-fullscreen-settings" style="display: none; flex: 1; background: var(--iftar-color); color: white; border-color: var(--iftar-color);">📥 Yükle</button>
                             </div>
                         </div>
                     </div>
@@ -401,7 +402,7 @@
         <div class="compass-container">
             <div class="compass-circle" id="compassCircle">
                 <div class="compass-north">N</div>
-                <div class="compass-qibla-marker" id="qiblaMarker" style="transform: rotate(145deg) translate(0, -100px);">&#128299;</div>
+                <div class="compass-qibla-marker" id="qiblaMarker" style="transform: rotate(145deg) translate(0, -100px);">🕋</div>
             </div>
             <button class="btn-permission" id="compassBtn" onclick="initCompass()">Pusulayı Başlat</button>
             <p class="compass-info">Pusulanın çalışması için telefonunuzun konum ve hareket sensörü izinlerine ihtiyacı vardır.<br><br><b>Kabe (Kıble) Yönü:</b> Yaklaşık <span id="qiblaAngleText">145°</span></p>
@@ -479,14 +480,30 @@
     function toggleFullScreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(e => console.log(e)); else if (document.exitFullscreen) document.exitFullscreen(); }
     document.addEventListener('fullscreenchange', () => { const fsBtn = document.getElementById('fsBtn'); if (document.fullscreenElement) fsBtn.innerHTML = "🔳 Çıkış Yap"; else fsBtn.innerHTML = "🔲 Tam Ekran"; });
 
+    // ZİYARETÇİ SAYACI (Akıllı Hafıza Sistemi ile rate limit çözüldü)
     async function fetchVisitorCount() {
+        // Ekrana önce hafızadaki son geçerli sayıyı yazdır (Yenileme anında boş kalmaması için)
+        let lastCount = localStorage.getItem('backup_visit_count');
+        if(lastCount) { document.getElementById('visitCount').innerText = parseInt(lastCount).toLocaleString('tr-TR'); }
+
         try {
-            let visited = sessionStorage.getItem('ziyaret_edildi'); let apiUrl = 'https://api.counterapi.dev/v1/namazvaktiasistani/ziyaret_v2';
+            let visited = sessionStorage.getItem('ziyaret_edildi'); 
+            let apiUrl = 'https://api.counterapi.dev/v1/namazvakti_app/visits'; 
             if (!visited) { apiUrl += '/up'; sessionStorage.setItem('ziyaret_edildi', 'true'); }
-            const res = await fetch(apiUrl); const data = await res.json(); 
-            let countVal = data.count !== undefined ? data.count : (data.value !== undefined ? data.value : data);
+            
+            const res = await fetch(apiUrl); 
+            if (!res.ok) throw new Error("API yanıt vermedi"); 
+            
+            const data = await res.json(); 
+            let countVal = data.count !== undefined ? data.count : (data.value !== undefined ? data.value : 0);
+            
+            // API başarılıysa yeni değeri ekrana yaz ve hafızayı güncelle
+            localStorage.setItem('backup_visit_count', countVal);
             document.getElementById('visitCount').innerText = parseInt(countVal).toLocaleString('tr-TR');
-        } catch(e) { document.getElementById('visitCount').innerText = "15.420"; }
+        } catch(e) {
+            // Eğer ilk girişse ve API çöktüyse
+            if(!lastCount) { document.getElementById('visitCount').innerText = "Sistem Hazırlanıyor..."; }
+        }
     }
 
     async function fetchLiveGoldPrice() {
@@ -548,7 +565,7 @@
         } catch(e) { console.log("İlçeler yüklenemedi", e); }
     }
 
-    // YENİ: GPS İLE KONUM BULMA
+    // GPS İLE KONUM BULMA
     async function geolocateUser() {
         if (!navigator.geolocation) return alert("Tarayıcınız konum desteklemiyor.");
         const btn = document.querySelector('.gps-btn'); btn.innerText = "⏳";
@@ -573,7 +590,7 @@
         }, () => { alert("Konum izni verilmedi."); btn.innerText = "📍"; });
     }
 
-    // YENİ: KIBLE PUSULASI
+    // KIBLE PUSULASI
     let compassListener = null;
     async function initCompass() {
         if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -715,6 +732,31 @@
     }
 
     window.onload = async () => { loadSettings(); loadZikir(); fetchVisitorCount(); await loadCities(); updateLiveDateTime(); setInterval(updateLiveDateTime, 1000); };
+    
+    // PWA VE YÜKLEME BUTONU TETİKLEYİCİSİ
+    if ('serviceWorker' in navigator) { 
+        window.addEventListener('load', () => { 
+            navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW Aktif')).catch(err => console.log('SW Hatası', err)); 
+        }); 
+    }
+    
+    let deferredPrompt; 
+    window.addEventListener('beforeinstallprompt', (e) => { 
+        e.preventDefault(); 
+        deferredPrompt = e; 
+        document.getElementById('installAppBtn').style.display = 'block'; 
+    });
+    
+    document.getElementById('installAppBtn').addEventListener('click', async () => { 
+        if (deferredPrompt) { 
+            deferredPrompt.prompt(); 
+            const { outcome } = await deferredPrompt.userChoice; 
+            if (outcome === 'accepted') { 
+                document.getElementById('installAppBtn').style.display = 'none'; 
+            } 
+            deferredPrompt = null; 
+        } 
+    });
 </script>
 </body>
 </html>
